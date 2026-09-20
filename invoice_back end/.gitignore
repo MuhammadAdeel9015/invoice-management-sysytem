@@ -1,0 +1,4 @@
+data/invoices.sqlite
+.env
+uploads/*
+!uploads/.gitkeep

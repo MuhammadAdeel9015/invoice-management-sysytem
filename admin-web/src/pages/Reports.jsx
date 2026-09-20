@@ -1,0 +1,15 @@
+import { useEffect, useState } from 'react'
+import { errorMessage, getReport, isAuthError } from '../services/api'
+import { Empty, ErrorState, Loading } from '../components/Feedback'
+import { useAuth } from '../auth/AuthContext'
+import { useNavigate } from 'react-router-dom'
+
+const money = (value) => `Rs ${Number(value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+export default function Reports() {
+  const [startDate, setStartDate] = useState(''); const [endDate, setEndDate] = useState(''); const [report, setReport] = useState([]); const [range, setRange] = useState({}); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const { signOut } = useAuth(); const navigate = useNavigate()
+  async function load() { setLoading(true); setError(''); try { const data = await getReport({ ...(startDate && { startDate }), ...(endDate && { endDate }) }); setReport(data.report || []); setRange(data) } catch (err) { if (isAuthError(err)) { signOut(); navigate('/login') } else setError(errorMessage(err, 'Unable to load report.')) } finally { setLoading(false) } }
+  useEffect(() => { load() }, [startDate, endDate])
+  const invoiceCount = report.reduce((sum, row) => sum + Number(row.invoiceCount || 0), 0); const total = report.reduce((sum, row) => sum + Number(row.totalAmount || 0), 0)
+  return <div className="content-stack"><div className="page-intro"><div><p className="eyebrow">Analytics</p><h2>Invoice activity</h2><p className="muted">Per-user activity from the live reporting endpoint.</p></div></div><section className="panel"><div className="filter-bar"><label><span>From</span><input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label><label><span>To</span><input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label><button className="button button-secondary filter-clear" onClick={() => { setStartDate(''); setEndDate('') }}>Today</button></div>{range.startDate && <p className="report-range">Showing {range.startDate} to {range.endDate}</p>}</section><div className="metric-grid compact-metrics"><Metric label="Invoices in range" value={invoiceCount} /><Metric label="Reported value" value={money(total)} /><Metric label="Users represented" value={report.filter((row) => row.invoiceCount > 0).length} /></div><section className="panel">{loading ? <Loading /> : error ? <ErrorState message={error} onRetry={load} /> : report.length ? <div className="table-wrap"><table><thead><tr><th>User</th><th>Invoice count</th><th className="align-right">Total amount</th></tr></thead><tbody>{report.map((row) => <tr key={row.userId}><td><strong>{row.username}</strong></td><td>{row.invoiceCount}</td><td className="align-right amount">{money(row.totalAmount)}</td></tr>)}</tbody></table></div> : <Empty title="No report entries" />}</section></div>
+}
+function Metric({ label, value }) { return <article className="metric-card tone-blue"><p>{label}</p><strong>{value}</strong></article> }

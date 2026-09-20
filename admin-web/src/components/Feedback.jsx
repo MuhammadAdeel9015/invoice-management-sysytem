@@ -1,0 +1,4 @@
+export function Loading({ label = 'Loading data...' }) { return <div className="state-panel"><span className="spinner" />{label}</div> }
+export function Empty({ title, children }) { return <div className="state-panel empty-state"><strong>{title}</strong>{children && <span>{children}</span>}</div> }
+export function ErrorState({ message, onRetry }) { return <div className="state-panel error-state"><strong>{message}</strong>{onRetry && <button className="button button-secondary" onClick={onRetry}>Try again</button>}</div> }
+export function Toast({ message, type = 'success', onClose }) { if (!message) return null; return <div className={`toast toast-${type}`} role="status"><span>{message}</span><button onClick={onClose} aria-label="Dismiss notification">×</button></div> }
