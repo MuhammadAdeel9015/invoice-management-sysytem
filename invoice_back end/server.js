@@ -349,6 +349,10 @@ app.get('/health', async (req, res) => {
 
 app.use((req, res) => res.status(404).json({ error: 'Endpoint not found', path: req.path }));
 
-app.listen(PORT, HOST, () => {
-  console.log(`Invoice backend listening on http://${HOST}:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, HOST, () => {
+    console.log(`Invoice backend listening on http://${HOST}:${PORT}`);
+  });
+}
+
+module.exports = app;
