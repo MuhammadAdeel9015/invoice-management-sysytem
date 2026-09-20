@@ -7,7 +7,7 @@ React/Vite administrator interface for the existing Office Invoices Express API.
 Start the backend first:
 
 ```powershell
-cd "..\invoice_back end"
+cd "..\invoice_backend"
 node server.js
 ```
 
